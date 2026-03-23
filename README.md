@@ -383,6 +383,51 @@ or directly from a URL if the source provides one.
 
 ---
 
+
+## Troubleshooting
+
+### Python version list unavailable during Install
+
+**Symptom:**
+```
+[ERROR] Could not retrieve Python version list.
+[WARN] Install aborted: no Python version selected.
+```
+
+**Cause:**
+You have the legacy **Python Launcher** (`py.exe`) installed on your system.
+The toolkit uses the new **Python Manager** (`pymanager`) which has a different command syntax.
+When both are present, the old launcher takes priority and `py list --online` fails.
+
+**Fix:**
+1. Open **Settings → Apps → Installed Apps**
+2. Search for **"Python Launcher"**
+3. Uninstall it
+4. Open a new terminal window
+5. Run the Environment script again
+
+> Your existing Python installations are **not affected** — only the old launcher is removed.
+> Windows will confirm this with the message:
+> *"If you have already installed the Python install manager, open Installed Apps and remove
+> 'Python Launcher' to enable the new py.exe command."*
+
+---
+
+### General recommendation before first install
+
+Before running `ComfyUI-Environment.ps1` for the first time, make sure your system does not
+have conflicting Python tooling:
+
+- **Python Launcher (legacy)** — remove it if present (see above)
+- **Other Python versions installed system-wide** — they will not be affected by the toolkit,
+  but if you have `PIP_CONSTRAINT` or other environment variables set globally they may
+  interfere with the venv setup
+
+The toolkit manages everything inside its own folder and venv — it does not touch your
+system Python or any other Python projects on your machine.
+
+---
+
 ---
 
 ## Українська секція
@@ -463,6 +508,22 @@ Triton, xFormers, SageAttention та Flash Attention **не встановлюю
 потрібно підібрати білд під точну комбінацію **Python + Torch + CUDA**.
 
 Офіційні джерела та збірки білдів — дивись секцію **Accelerators** вище.
+
+
+### Вирішення проблем
+
+**Помилка: список версій Python недоступний під час Install**
+
+Симптом: `[ERROR] Could not retrieve Python version list.`
+
+Причина: в системі встановлений старий **Python Launcher** (legacy `py.exe`) який конфліктує
+з новим **Python Manager**. Видали його через **Параметри → Програми → Встановлені програми**,
+знайди **"Python Launcher"** і видали. Існуючі версії Python не постраждають.
+
+**Загальна рекомендація перед першим встановленням**
+
+Перед запуском `ComfyUI-Environment.ps1` переконайся що в системі немає старого Python Launcher.
+Якщо Windows показує повідомлення про legacy `py.exe` — це саме та проблема.
 
 ### Важливо
 
