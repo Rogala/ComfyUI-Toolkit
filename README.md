@@ -1,4 +1,4 @@
-﻿# ComfyUI-Toolkit
+# ComfyUI-Toolkit
 
 > A set of Windows tools for installing, managing, updating, switching versions, and running
 > ComfyUI + the PyTorch stack in a Python venv virtual environment for NVIDIA GPUs.
@@ -11,15 +11,21 @@
 from scratch, switching Python versions, managing the PyTorch/CUDA stack, repairing dependency
 conflicts, and launching ComfyUI — all from a single `.bat` file.
 
-Built for people who run ComfyUI locally on an NVIDIA GPU and want a clean, repeatable setup.
-Manual package management is still available at any time through the built-in venv console
-(option 8 in the launcher).
+This is **not a portable version**. It is a locally cloned ComfyUI running inside a Python
+virtual environment (venv). All packages are isolated inside the venv and do not affect your
+system Python or any other software on your machine.
+
+Designed for users who are comfortable with a console and want to understand what is happening
+under the hood — the toolkit handles the routine work of setup and maintenance, but nothing
+is hidden from you.
+
+Manual package management is always available through the built-in venv console (option 8).
 
 ---
 
 ## Who is it for?
 
-- First-time ComfyUI users who want a guided, automated setup
+- Users taking their first steps with a local ComfyUI setup who want a clean, guided process
 - Power users who switch between PyTorch / CUDA versions or test new ComfyUI releases
 - Anyone who has broken their venv and needs a reliable repair tool
 - Users who install many custom nodes and deal with dependency conflicts
@@ -233,6 +239,14 @@ in the `.bat` launcher or directly as a PowerShell script.
 
 Auto-returns to the main menu after 5 minutes of inactivity.
 
+> **Note on response times:** some operations in this script involve network requests and
+> package index lookups which may take 10–30 seconds before output appears:
+> - `[1]` fetches the CUDA version list from pytorch.org and queries the PyTorch package index
+> - `[2]` runs `git fetch --tags` and optionally queries the GitHub API for release notes
+> - `[3]` runs `pip index versions` for each package in requirements.txt during smart_fixer
+>
+> This is normal — the script is not frozen, it is working.
+
 ### [1] Change Torch Stack
 
 - Fetches the list of currently supported CUDA versions dynamically from
@@ -277,18 +291,19 @@ the output will tell you what to do.
 
 ### [4] Show Environment Info
 
-Displays a full snapshot of the current environment and saves it to `.cache/env_state.log`:
+Displays a full snapshot of the current environment and saves it to `.cache/env_state.log`.
+Also shows the status of all major accelerators:
 
 ```
   --- System Environment Info ---
   ComfyUI:         v0.18.3 (a1b2c3d)
-  GPU / CUDA:      NVIDIA GeForce RTX 4090 (24.0 GB VRAM, Driver 572.16, CUDA 12.8)
+  GPU / CUDA:      NVIDIA GeForce RTX 5060 Ti (16.0 GB VRAM, Driver 572.16, CUDA 13.0)
   CPU Info:        Intel Core i9-13900K (24C/32T)
   RAM Size:        64.0 GB
-  Python Version:  3.12.10
-  Torch:           2.7.0+cu128
-  Torchaudio:      2.7.0+cu128
-  Torchvision:     0.22.0+cu128
+  Python Version:  3.14.3
+  Torch:           2.10.0+cu130
+  Torchaudio:      2.10.0+cu130
+  Torchvision:     0.22.0+cu130
   Triton:          Not installed
   Xformers:        Not installed
   Flash-Attn:      Not installed
@@ -323,6 +338,41 @@ These can only be changed via **option [1] Change Torch Stack**.
 
 ---
 
+## Accelerators (optional)
+
+Accelerators such as Triton, xFormers, SageAttention and Flash Attention are **not installed
+automatically**. They must be installed manually using the venv console (option 8 in the launcher).
+
+You need to select a pre-built wheel that matches your exact combination of
+**Python version + Torch version + CUDA version**. Use option `[4] Show Environment Info`
+in the Manager to see your current versions before choosing a package.
+
+**Official sources:**
+
+| Accelerator | Source |
+|---|---|
+| Triton (Windows) | https://github.com/triton-lang/triton-windows |
+| SageAttention | https://github.com/woct0rdho/SageAttention |
+| xFormers | https://github.com/facebookresearch/xformers |
+| Flash Attention | https://github.com/Dao-AILab/flash-attention |
+
+**Pre-built wheels collections:**
+
+| Collection | Notes |
+|---|---|
+| https://github.com/wildminder/AI-windows-whl | Large collection of pre-built Windows wheels |
+| https://github.com/Rogala/AI_Attention | Builds optimized for RTX 5xxx Blackwell architecture |
+
+**Installation example (from venv console, option 8):**
+
+```bat
+pip install <path-to-wheel-file>.whl
+```
+
+or directly from a URL if the source provides one.
+
+---
+
 ## Notes
 
 - The `.ps1` files are already saved with **UTF-8 BOM** encoding — do not change the encoding
@@ -343,12 +393,18 @@ These can only be changed via **option [1] Change Torch Stack**.
 встановлення середовища з нуля, перемикання версій Python та PyTorch, керування залежностями
 та запуск ComfyUI — все з одного `.bat` файлу. Тільки для відеокарт NVIDIA.
 
-Ручне керування пакетами теж доступне в будь-який момент через вбудовану консоль venv
-(пункт 8 в лаунчері).
+Це **не портативна версія**. Це локально клонований ComfyUI що працює всередині
+віртуального середовища Python (venv). Всі пакети ізольовані у venv і не впливають
+на системний Python або будь-яке інше програмне забезпечення на твоєму комп'ютері.
+
+Призначено для користувачів які не бояться консолі і хочуть розуміти що відбувається —
+toolkit бере на себе рутину налаштування та обслуговування, але нічого не приховує.
+
+Ручне керування пакетами доступне в будь-який момент через вбудовану консоль venv (пункт 8).
 
 ### Для кого
 
-- Для тих хто вперше встановлює ComfyUI і хоче покроковий автоматичний процес
+- Для тих хто робить перші кроки з локальним ComfyUI і хоче чистий покроковий процес
 - Для досвідчених користувачів що перемикаються між версіями PyTorch / CUDA або тестують нові релізи
 - Для тих хто зламав venv і потребує надійного інструменту відновлення
 - Для тих хто використовує багато custom nodes і стикається з конфліктами залежностей
@@ -359,7 +415,7 @@ These can only be changed via **option [1] Change Torch Stack**.
 - Відеокарта NVIDIA з підтримкою CUDA
 - Інтернет-з'єднання (потрібне постійно — для встановлення, оновлень та отримання списків версій)
 - PowerShell 5.1+ (вбудований в Windows 10/11)
-- Права адміністратора (тільки для скрипту Environment — пояснення нижче)
+- Права адміністратора (тільки для скрипту Environment)
 
 > **Чому потрібні права адміністратора?**
 > `ComfyUI-Environment.ps1` встановлює системні програми: Git for Windows, Python Launcher
@@ -398,11 +454,22 @@ These can only be changed via **option [1] Change Torch Stack**.
 5. Вибери пункт `6` щоб встановити PyTorch через `ComfyUI-Manager.ps1`
 6. Вибери пункт `1` або `2` для запуску ComfyUI
 
+### Прискорювачі (опціонально)
+
+Triton, xFormers, SageAttention та Flash Attention **не встановлюються автоматично**.
+Їх треба встановити вручну через консоль venv (пункт 8 в лаунчері).
+
+Перед вибором пакету перевір свої версії через пункт `[4] Show Environment Info` в Manager —
+потрібно підібрати білд під точну комбінацію **Python + Torch + CUDA**.
+
+Офіційні джерела та збірки білдів — дивись секцію **Accelerators** вище.
+
 ### Важливо
 
-- Папка `output/` в корені — зображення не загубляться при перевстановленні ComfyUI
+- Це не портативна версія — це повноцінний локальний ComfyUI у venv
 - Інтернет потрібен завжди — без нього встановлення та оновлення не працюватимуть
-- Файли `.ps1` вже збережені з кодуванням **UTF-8 BOM** — не змінюй кодування при редагуванні, інакше PowerShell не зможе їх правильно прочитати
+- Файли `.ps1` вже збережені з кодуванням **UTF-8 BOM** — не змінюй кодування при редагуванні
 - `const.txt` перегенеровується після кожного успішного ремонту або встановлення torch — не редагуй вручну
-- Захищені пакети (`torch`, `torchvision`, `torchaudio`) ніколи не змінюються інструментами ремонту — тільки через пункт `[1] Change Torch Stack` в Manager
-- Ремонт залежностей запускається автоматично після встановлення torch або зміни версії ComfyUI, а також може бути запущений вручну після встановлення custom nodes
+- Захищені пакети (`torch`, `torchvision`, `torchaudio`) змінюються тільки через пункт `[1]` в Manager
+- Деякі операції в Manager можуть займати 10–30 секунд без виводу — це нормально, скрипт не завис
+- Ремонт залежностей запускається автоматично після встановлення torch або зміни версії ComfyUI
