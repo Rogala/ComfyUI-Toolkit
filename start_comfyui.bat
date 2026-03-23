@@ -220,7 +220,11 @@ python -m pip install --upgrade pip
 echo.
 echo [INFO] Type 'exit' to return to menu.
 echo.
-cmd /k "call %ACTIVATE_SCRIPT%"
+if exist ".cache\const.txt" (
+    cmd /k "call %ACTIVATE_SCRIPT% && doskey pip=pip $* -c .cache\const.txt"
+) else (
+    cmd /k "call %ACTIVATE_SCRIPT%"
+)
 goto MENU
 
 :HELP
