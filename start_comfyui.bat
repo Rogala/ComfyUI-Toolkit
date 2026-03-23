@@ -221,7 +221,7 @@ echo.
 echo [INFO] Type 'exit' to return to menu.
 echo.
 if exist ".cache\const.txt" (
-    cmd /k "call %ACTIVATE_SCRIPT% && doskey pip=pip $* -c .cache\const.txt"
+    cmd /k "call %ACTIVATE_SCRIPT% && doskey pip install=pip install $* -c .cache\const.txt"
 ) else (
     cmd /k "call %ACTIVATE_SCRIPT%"
 )
