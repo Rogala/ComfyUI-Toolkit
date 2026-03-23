@@ -413,6 +413,36 @@ When both are present, the old launcher takes priority and `py list --online` fa
 
 ---
 
+
+### Python already installed system-wide (without Python Launcher)
+
+**Symptom:**
+The Environment script runs without errors but the venv ends up using a wrong Python version,
+or `py -3.12` calls a different Python than expected.
+
+**Cause:**
+If Python was installed manually (not through the Python Manager), it registers itself in PATH
+directly. When `py -X.XX` is called, there may be a conflict between the system Python and
+the one managed by `pymanager`.
+
+**Fix:**
+1. Open a new terminal and run:
+```
+py list
+where python
+where py
+```
+2. Make sure `py` points to the Python Manager version, not a manually installed one
+3. If there is a conflict — open **Settings → Apps → Installed Apps**, find any manually
+   installed Python versions (e.g. **Python 3.12.x**) and uninstall them
+4. Let Python Manager handle all Python versions — it is designed to coexist cleanly
+
+> **Note:** Uninstalling a system Python will not affect the toolkit venv once it is created —
+> the venv is self-contained. But for a clean first install it is better to have only
+> Python Manager managing your Python versions.
+
+---
+
 ### General recommendation before first install
 
 Before running `ComfyUI-Environment.ps1` for the first time, make sure your system does not
@@ -519,6 +549,18 @@ Triton, xFormers, SageAttention та Flash Attention **не встановлюю
 Причина: в системі встановлений старий **Python Launcher** (legacy `py.exe`) який конфліктує
 з новим **Python Manager**. Видали його через **Параметри → Програми → Встановлені програми**,
 знайди **"Python Launcher"** і видали. Існуючі версії Python не постраждають.
+
+
+**Python вже встановлений в системі (без Python Launcher)**
+
+Симптом: venv створюється від не тієї версії Python, або `py -3.12` викликає не той інтерпретатор.
+
+Причина: Python встановлений вручну прописує себе в PATH напряму і може конфліктувати з Python Manager.
+
+Виправлення:
+1. Перевір командами `py list`, `where python`, `where py` — що саме викликається
+2. Якщо є конфлікт — видали вручну встановлені версії Python через **Параметри → Програми**
+3. Дай Python Manager керувати всіма версіями Python — він для цього і призначений
 
 **Загальна рекомендація перед першим встановленням**
 
