@@ -5,6 +5,15 @@
 
 ---
 
+
+> [!WARNING]
+> **Before running the scripts for the first time:**
+> - Remove the legacy **Python Launcher** if installed (Settings → Apps → search "Python Launcher")
+> - Remove any manually installed standalone Python versions to avoid PATH conflicts
+> - Let the toolkit install and manage Python through **Python Manager** (`pymanager`)
+>
+> Skipping this step is the most common cause of setup failures. See [Troubleshooting](#troubleshooting) for details.
+
 ## What is this?
 
 **ComfyUI-Toolkit** automates everything around ComfyUI on Windows: setting up the environment
@@ -41,7 +50,7 @@ Manual package management is always available through the built-in venv console 
 - Administrator rights (Environment script only — see note below)
 
 > **Why administrator rights?**
-> `ComfyUI-Environment.ps1` installs system-level software: Git for Windows, Python Launcher,
+> `ComfyUI-Environment.ps1` installs system-level software: Git for Windows, Python Manager (`pymanager`),
 > and Visual C++ Runtime. These require elevated privileges — the same as any standard installer
 > you download from the web. The script does not modify anything outside of these installations
 > and the folder you place it in. You can review the full source code before running it.
@@ -464,6 +473,15 @@ system Python or any other Python projects on your machine.
 
 ## Українська секція
 
+
+> [!WARNING]
+> **Перед першим запуском скриптів:**
+> - Видали старий **Python Launcher** якщо встановлений (Параметри → Програми → пошук "Python Launcher")
+> - Видали будь-які вручну встановлені версії Python щоб уникнути конфліктів PATH
+> - Дай toolkit встановити Python через **Python Manager** (`pymanager`)
+>
+> Пропуск цього кроку — найпоширеніша причина помилок при встановленні. Дивись розділ [Вирішення проблем](#вирішення-проблем).
+
 ### Що це
 
 **ComfyUI-Toolkit** — набір інструментів для Windows що автоматизує все навколо ComfyUI:
@@ -495,7 +513,7 @@ toolkit бере на себе рутину налаштування та обс
 - Права адміністратора (тільки для скрипту Environment)
 
 > **Чому потрібні права адміністратора?**
-> `ComfyUI-Environment.ps1` встановлює системні програми: Git for Windows, Python Launcher
+> `ComfyUI-Environment.ps1` встановлює системні програми: Git for Windows, Python Manager (`pymanager`)
 > та Visual C++ Runtime. Це вимагає підвищених привілеїв — так само як будь-який стандартний
 > інсталятор. Скрипт не змінює нічого за межами цих встановлень і папки де він знаходиться.
 > Ти можеш переглянути весь вихідний код перед запуском.
