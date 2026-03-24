@@ -307,14 +307,14 @@ Also shows the status of all major accelerators:
 
 ```
   --- System Environment Info ---
-  ComfyUI:         v0.18.3 (a1b2c3d)
+  ComfyUI:         v0.18.1 (a1b2c3d)
   GPU / CUDA:      NVIDIA GeForce RTX 5060 Ti (16.0 GB VRAM, Driver 572.16, CUDA 13.0)
   CPU Info:        Intel Core i9-13900K (24C/32T)
   RAM Size:        64.0 GB
   Python Version:  3.14.3
   Torch:           2.10.0+cu130
   Torchaudio:      2.10.0+cu130
-  Torchvision:     0.22.0+cu130
+  Torchvision:     0.25.0+cu130
   Triton:          Not installed
   Xformers:        Not installed
   Flash-Attn:      Not installed
