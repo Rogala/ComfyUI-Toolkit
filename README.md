@@ -99,7 +99,9 @@ Run ComfyUI-Environment.ps1 now? (Y/N):
 ```
 
 4. Press `Y` — the Environment script runs, sets everything up, then the launcher restarts
-5. Choose option `6` to install the PyTorch stack via **ComfyUI-Manager.ps1**
+5. Choose option `6` to open **ComfyUI-Manager.ps1**, then:
+   - `[1]` install the PyTorch stack
+   - `[2]` select your ComfyUI version (this syncs all dependencies)
 6. Choose option `1` or `2` to launch ComfyUI
 
 ---
@@ -201,7 +203,7 @@ Manages the full lifecycle of the base environment.
 
 Runs in order:
 
-1. **Python Launcher** (`py`) — downloads and installs if missing
+1. **Python Manager** (`pymanager`) — downloads and installs if missing. Note: this is the NEW launcher from python.org, different from the legacy **Python Launcher**. If you have the legacy one installed, remove it first (see Troubleshooting)
 2. **Git for Windows** — downloads latest release from GitHub if missing
 3. **Visual C++ Runtime** — installs if missing
 4. **Python** — lets you pick a branch (e.g. 3.12) from the online list, installs if needed
@@ -526,7 +528,9 @@ toolkit бере на себе рутину налаштування та обс
 2. Запусти `start_comfyui.bat`
 3. Лаунчер виявить відсутність `venv` і запропонує одразу запустити `ComfyUI-Environment.ps1`
 4. Підтверди — середовище встановиться автоматично, лаунчер перезапуститься
-5. Вибери пункт `6` щоб встановити PyTorch через `ComfyUI-Manager.ps1`
+5. Вибери пункт `6` щоб відкрити `ComfyUI-Manager.ps1`, потім:
+   - `[1]` встанови PyTorch стек
+   - `[2]` вибери версію ComfyUI (це синхронізує всі залежності)
 6. Вибери пункт `1` або `2` для запуску ComfyUI
 
 ### Прискорювачі (опціонально)
