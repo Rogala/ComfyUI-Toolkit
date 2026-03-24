@@ -102,7 +102,7 @@ your-folder/          <- recommended: fast non-system SSD/NVMe drive
 
  To get started, ComfyUI-Environment.ps1 must be run first.
  It will install all required software, create the venv,
- clone ComfyUI and install ComfyUI-Manager.
+ clone ComfyUI.
 
 Run ComfyUI-Environment.ps1 now? (Y/N):
 ```
