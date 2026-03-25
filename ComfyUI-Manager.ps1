@@ -465,7 +465,7 @@ function Change-Torch {
 
     # --- Install torch trio ---
     Write-Host ""; Write-Log "Installing Torch Stack ($target, cu$selectedCu)..." PROCESS
-    & $VenvPython -m pip install "torch==$target" torchvision torchaudio `
+    & $VenvPython -m pip install "torch==$target" torchvision "torchaudio==$target" `
         --index-url $indexUrl --upgrade --prefer-binary --force-reinstall
 
     # --- Sync ComfyUI requirements (torch stack excluded) ---
