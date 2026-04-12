@@ -1,22 +1,20 @@
-# ComfyUI-Toolkit
+# ComfyUI Toolkit
 
-> A set of Windows tools for installing, managing, updating, switching versions, and running
-> ComfyUI + the PyTorch stack in a Python venv virtual environment for NVIDIA GPUs.
+> Windows tools for installing, managing, updating, switching versions, and running
+> ComfyUI with the PyTorch stack in a Python virtual environment — for NVIDIA GPUs.
 
 ---
 
+- [English](#english)
+- [Українська](#українська)
 
-> [!WARNING]
-> **Before running the scripts for the first time:**
-> - Remove the legacy **Python Launcher** if installed (Settings → Apps → search "Python Launcher")
-> - Remove any manually installed standalone Python versions to avoid PATH conflicts
-> - Let the toolkit install and manage Python through **Python Manager** (`pymanager`)
->
-> Skipping this step is the most common cause of setup failures. See [Troubleshooting](#troubleshooting) for details.
+---
+
+# English
 
 ## What is this?
 
-**ComfyUI-Toolkit** automates everything around ComfyUI on Windows: setting up the environment
+**ComfyUI Toolkit** automates everything around ComfyUI on Windows: setting up the environment
 from scratch, switching Python versions, managing the PyTorch/CUDA stack, repairing dependency
 conflicts, and launching ComfyUI — all from a single `.bat` file.
 
@@ -25,12 +23,9 @@ virtual environment (venv). All packages are isolated inside the venv and do not
 system Python or any other software on your machine.
 
 Designed for users who are comfortable with a console and want to understand what is happening
-under the hood — the toolkit handles the routine work of setup and maintenance, but nothing
-is hidden from you.
-
-Manual package management is always available through the built-in venv console (option 8).
-
----
+under the hood. The toolkit handles the routine work of setup and maintenance, but nothing
+is hidden from you. Manual package management is always available through the built-in
+venv console.
 
 ## Who is it for?
 
@@ -39,361 +34,359 @@ Manual package management is always available through the built-in venv console 
 - Anyone who has broken their venv and needs a reliable repair tool
 - Users who install many custom nodes and deal with dependency conflicts
 
----
-
 ## Requirements
 
 - Windows 10 / 11 (64-bit)
 - NVIDIA GPU with CUDA support
-- Internet connection (required at all times — for installs, updates, and fetching version lists)
-- PowerShell 5.1+ (included in Windows 10/11)
-- Administrator rights (Environment script only — see note below)
-
-> **Why administrator rights?**
-> `ComfyUI-Environment.ps1` installs system-level software: Git for Windows, Python Manager (`pymanager`),
-> and Visual C++ Runtime. These require elevated privileges — the same as any standard installer
-> you download from the web. The script does not modify anything outside of these installations
-> and the folder you place it in. You can review the full source code before running it.
-
----
+- Internet connection (required for installs, updates, and fetching version lists)
+- PowerShell 5.1+ (built into Windows 10/11)
+- Administrator rights — **only for the first install** of Python Manager, Git, and VC++ Runtime
 
 ## File structure
 
-Place all four files in an **empty folder on a fast drive (SSD or NVMe), preferably not the
-system drive**, as ComfyUI models and the venv can take tens of gigabytes:
+Place both files in an **empty folder on a fast drive (SSD or NVMe), preferably not the
+system drive** — ComfyUI with models and the venv can take tens of gigabytes:
 
 ```
-your-folder/          <- recommended: fast non-system SSD/NVMe drive
+your-folder/                    ← recommended: fast non-system SSD/NVMe
 │
-├── start_comfyui.bat            <- main launcher, start here
-├── ComfyUI-Environment.ps1      <- installs and manages the environment
-├── ComfyUI-Manager.ps1          <- manages PyTorch, ComfyUI versions, repairs deps
-├── smart_fixer.py               <- auto dependency guard (used by Manager internally)
+├── start_comfyui.bat           ← entry point — double-click to launch
+├── comfyui.ps1                 ← all logic lives here
 │
-│   -- created automatically --
+│   — created automatically —
 │
-├── ComfyUI/                     <- cloned by Environment script
-├── venv/                        <- created by Environment script
-├── output/                      <- created by launcher on first run (your generated images)
-└── .cache/                      <- created by Manager (logs, snapshots, temp files)
-    ├── history.log              <- timestamped log of all Manager operations
-    ├── env_state.log            <- last environment info snapshot
-    ├── const.txt                <- stable dependency snapshot used as pip constraint
-    └── smart_fixer.py           <- deployed here automatically by Manager
+├── ComfyUI/                    ← cloned by [E] Install
+├── venv/                       ← created by [E] Install
+├── output/                     ← created on first launch (your generated images)
+└── .cache/                     ← created automatically
+    ├── smart_fixer.py          ← deployed from comfyui.ps1 on startup
+    ├── const.txt               ← stable dependency snapshot (pip constraint)
+    ├── settings.json           ← language preference
+    ├── history.log             ← timestamped log of all operations
+    ├── release_notes.log       ← ComfyUI release notes fetched during version switch
+    └── env_state.log           ← last [I] Info snapshot
 ```
 
 > **Why is `output/` next to the `.bat` and not inside `ComfyUI/`?**
 > If you delete or reinstall the `ComfyUI/` folder, everything inside it is gone.
 > Keeping generated images at the root level means they survive any reinstall.
 
----
+> **Why only two files?**
+> `smart_fixer.py` is embedded inside `comfyui.ps1` as a here-string and deployed
+> to `.cache/` automatically on startup. You do not need to manage it manually.
+
+## Before the first run
+
+> [!WARNING]
+> **Remove the legacy Python Launcher** if installed before running the toolkit.
+> Go to **Settings → Apps → Installed Apps**, search for **"Python Launcher"** and uninstall it.
+> The toolkit uses the new **Python Manager** (`pymanager`) which conflicts with the legacy one.
+> Your existing Python installations are **not affected** — only the old launcher is removed.
+
+Also remove any manually installed standalone Python versions to avoid PATH conflicts.
+Let the toolkit install and manage Python through Python Manager.
 
 ## Quick start
 
 ### First run (nothing installed yet)
 
-1. Place all four files in an empty folder
-2. Run `start_comfyui.bat`
-3. The launcher detects that `venv` is missing and prompts:
+1. Place `start_comfyui.bat` and `comfyui.ps1` in an empty folder
+2. Double-click `start_comfyui.bat`
+3. The launcher detects that `venv` is missing and prompts to run the install
+4. Confirm — the install flow runs automatically
+5. After install: press **[T]** to set up the PyTorch stack
+6. Press **[V]** to select a ComfyUI version (this syncs all dependencies)
+7. Press **[1]** to launch ComfyUI
 
-```
-[WARN]  Virtual environment not found: .\venv\Scripts\activate.bat
-[INFO]  This is probably your first run. The environment has not been set up yet.
+### Subsequent runs
 
- To get started, ComfyUI-Environment.ps1 must be run first.
- It will install all required software, create the venv,
- clone ComfyUI.
-
-Run ComfyUI-Environment.ps1 now? (Y/N):
-```
-
-4. Press `Y` — the Environment script runs, sets everything up, then the launcher restarts
-5. Choose option `6` to open **ComfyUI-Manager.ps1**, then:
-   - `[1]` install the PyTorch stack
-   - `[2]` select your ComfyUI version (this syncs all dependencies)
-6. Choose option `1` or `2` to launch ComfyUI
+Double-click `start_comfyui.bat` → press **[1]** or **[2]** to launch.
 
 ---
 
-## start_comfyui.bat
+## Interface
 
-The main entry point. Activates the venv once at startup and keeps it active for all actions.
-Creates the `output/` folder automatically on first run if it does not exist.
+The launcher opens a **PowerShell window** with full Unicode and color support.
+Navigation is by **single keypress** — no Enter needed.
+
+### Header
 
 ```
- --- ComfyUI Multi-Launcher ---
- --- Launch ---
- 1. Normal
- 2. Normal + fast
- ----------------------------------------------------
- --- Tools ---
- 5. Setup environment    (ComfyUI-Environment.ps1)
- 6. Manage packages      (ComfyUI-Manager.ps1)
- 7. Install ComfyUI-Manager
- 8. venv console         (pip / manual install)
- 9. ComfyUI help         (--help)
- 0. Exit
+  ==============================================================
+    ComfyUI Launcher                                       [UK]
+  ==============================================================
+
+   Python 3.12.10 ✓   ComfyUI v0.18.5 ✓   PyTorch 2.11.0+cu130
+
+  Press [L] to change language Language (EN UK)
+
+   * Update available: v0.19.0
 ```
 
-### Launch modes
+- **Python / ComfyUI** — green badge if found, red if missing
+- **PyTorch** — cyan badge with version and CUDA suffix, red if missing
+- **`[UK]`** — current interface language code shown in the title bar
+- **Language hint** — shows current language name; press `[L]` to switch
+- **`* Update available`** — appears when a newer ComfyUI release is detected on GitHub
+  (checked once per session in the background, no delay on menu draw)
 
-**1. Normal** — standard ComfyUI launch with base arguments from `COMMON_ARGS`.
+### Language
 
-**2. Normal + fast** — adds `--fast` which enables faster attention and other optimizations
-available in recent ComfyUI versions.
+Press **`[L]`** at any time to toggle between two languages:
 
-### COMMON_ARGS
+`EN ↔ UK`
 
-At the top of the `.bat` file there is a shared argument string applied to all launch modes:
+The selection is saved automatically to `.cache/settings.json` and restored on next launch.
+On first run the language is detected from your system locale (`Get-Culture`).
 
-```bat
-set "COMMON_ARGS=--output-directory .\output"
-```
-
-You can extend it with any ComfyUI flags that should always be active.
-For a full list of available flags use option `9` (ComfyUI help) in the launcher.
-
-Some common examples:
-
-```bat
-:: --listen            : allow connections from other devices on the network
-:: --reserve-vram 0.5  : keep 0.5 GB VRAM free for the OS
-:: --enable-manager    : enable ComfyUI-Manager plugin on startup
-:: --lowvram           : for GPUs with limited VRAM
-:: --preview-method auto : enable latent previews during generation
-```
-
-### Adding a custom launch mode
-
-You need to edit **3 places** in the file, all clearly marked with comments `PLACE 1`, `PLACE 2`, `PLACE 3`:
-
-```bat
-:: PLACE 1 — add to the menu echo block
-echo  3. Sage Attention + fast
-
-:: PLACE 2 — add a condition
-if "%choice%"=="3" goto RUN_SAGE_FAST
-
-:: PLACE 3 — add the launch block
-:RUN_SAGE_FAST
-echo [STEP] Starting ComfyUI - Sage Attention + fast...
-python "%MAIN_PY%" %COMMON_ARGS% --use-sage-attention --fast
-pause
-goto MENU
-```
-
-### Option 7 — Install ComfyUI-Manager
-
-Clones [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager) into
-`ComfyUI/custom_nodes/` without launching any external script.
-Detects if it is already installed and skips if so.
-
-### Option 8 — venv console
-
-Opens an interactive console **inside the venv**. All `pip` commands install packages
-into the venv only — not into the global system Python. Type `exit` to return to the menu.
+Technical log lines (`[OK]`, `[WARN]`, `[ERROR]`, `[STEP]`) are always in English
+regardless of the selected language — this makes it easier to search for errors online.
 
 ---
 
-## ComfyUI-Environment.ps1
+## Menu reference
 
-Manages the full lifecycle of the base environment.
+### Launch
 
+| Key | Name | Description |
+|-----|------|-------------|
+| `1` | Normal | Standard ComfyUI launch with `COMMON_ARGS` |
+| `2` | Fast | Adds `--fast` (experimental speed optimizations) |
+
+**Adding a custom launch mode** — edit `comfyui.ps1`, find `$LAUNCH_MODES` in `#region CONFIG`
+and add one line:
+
+```powershell
+@{ Key="3"; LabelKey="menu.lowvram.label"; DescKey="menu.lowvram.desc"; Args=@("--lowvram") }
 ```
-  Select action:
 
-    1  Install  - fresh setup: py launcher, git, vc++, python, venv, ComfyUI
-    2  Update   - update git + python minor; venv and ComfyUI not touched
-    3  Swap     - change Python branch; recreates venv, ComfyUI not touched
-    0  Exit
+The menu rebuilds automatically. No other changes needed.
+
+**Shared arguments** — edit `$COMMON_ARGS` in `#region CONFIG`:
+
+```powershell
+$COMMON_ARGS = @("--output-directory", ".\output", "--listen", "--reserve-vram", "0.5")
 ```
 
-### Install
+---
 
-Runs in order:
+### Environment `[E] [U] [S]`
 
-1. **Python Manager** (`pymanager`) — downloads and installs if missing. Note: this is the NEW launcher from python.org, different from the legacy **Python Launcher**. If you have the legacy one installed, remove it first (see Troubleshooting)
-2. **Git for Windows** — downloads latest release from GitHub if missing
-3. **Visual C++ Runtime** — installs if missing
-4. **Python** — lets you pick a branch (e.g. 3.12) from the online list, installs if needed
-5. **venv** — creates a clean virtual environment under the selected Python version
-6. **ComfyUI** — clones from the official Comfy-Org repository
-7. **pip** — upgrades pip inside the venv
+#### `[E]` Install ★ Administrator required
 
-### Update
+Full fresh setup. A UAC prompt will appear — this is expected.
+
+**Admin-only steps** (run in a separate elevated window that closes automatically):
+1. **Python Manager** (`pymanager`) — new-generation Python version manager from python.org
+2. **Git for Windows** — latest release from GitHub
+3. **Visual C++ Runtime** — if not already installed
+
+**User-level steps** (run in the main window after the elevated window closes):
+
+4. **Python version** — interactive selection from the online list (stable releases only, no dev/alpha/beta); installs if not present locally
+5. **venv** — created under the selected Python version
+6. **pip** — upgraded inside the venv
+7. **ComfyUI** — cloned from the official Comfy-Org repository
+
+After install: use **[T]** to install PyTorch, then **[V]** to select a ComfyUI version.
+
+> **Why administrator rights?**
+> Python Manager and Git write to system PATH. VC++ Runtime writes to the system registry.
+> These are standard installer operations — the same as any software you download from the web.
+> Everything else (venv, pip, ComfyUI) runs as your normal user account.
+
+#### `[U]` Update
 
 Updates Git and Python minor version only. The venv and ComfyUI folder are not touched.
-Useful for keeping base tools current without risking the environment.
 
-### Swap
+- Git: checks latest release on GitHub, reports if update requires admin (use `[E]` Install)
+- Python: `py install X.Y --update` via Python Manager — no admin required for minor updates
+- pip: upgraded inside the venv
 
-Deletes the existing venv and recreates it under a different Python branch.
-ComfyUI folder is not touched. After a swap, the PyTorch stack must be reinstalled
-via **ComfyUI-Manager.ps1** option `[1]`.
+#### `[S]` Swap Python
 
----
+Changes the Python version used by the venv. The ComfyUI folder is not touched.
 
-## ComfyUI-Manager.ps1
+**Safe order of operations:**
+1. Select new Python version (interactive, stable releases only)
+2. Confirm the destructive action
+3. Delete old venv
+4. Create new venv under selected version
+5. Upgrade pip
 
-Manages the PyTorch stack, ComfyUI version and environment health. Launched via option `6`
-in the `.bat` launcher or directly as a PowerShell script.
-
-```
-  ComfyUI Master Manager  v0.1
-  -----------------------------------
- [1] Change Torch Stack (NVIDIA CUDA)
- [2] Change ComfyUI Version (Tags / Notes)
- [3] Repair Environment (Deep Clean)
- [4] Show Environment Info
- [0] Exit
-```
-
-Auto-returns to the main menu after 5 minutes of inactivity.
-
-> **Note on response times:** some operations in this script involve network requests and
-> package index lookups which may take 10–30 seconds before output appears:
-> - `[1]` fetches the CUDA version list from pytorch.org and queries the PyTorch package index
-> - `[2]` runs `git fetch --tags` and optionally queries the GitHub API for release notes
-> - `[3]` runs `pip index versions` for each package in requirements.txt during smart_fixer
->
-> This is normal — the script is not frozen, it is working.
-
-### [1] Change Torch Stack
-
-- Fetches the list of currently supported CUDA versions dynamically from
-  [pytorch.org/get-started/locally](https://pytorch.org/get-started/locally/)
-- For each CUDA version shows the 3 most recent available Torch builds
-- Installs `torch` + `torchvision` + `torchaudio` as a matched trio
-- Syncs `ComfyUI/requirements.txt` afterwards (torch trio excluded)
-- Saves a version snapshot to `.cache/const.txt` for future constraint enforcement
-- Warns if the new Torch stack conflicts with current ComfyUI requirements
-- Warns if custom nodes are installed (they may not work with the new stack)
-- Automatically runs **Repair Environment** after install to resolve any dependency conflicts
-
-### [2] Change ComfyUI Version
-
-Two-level selection: branch (e.g. `v0.18`) then patch version (e.g. `v0.18.3`).
-
-- Optionally fetches and displays release notes from GitHub before switching
-- Checks if `requirements.txt` for the target version references the protected torch stack
-- Detects downgrades and offers to delete the ComfyUI database to avoid migration errors
-  (database stores only asset cache and job history — no workflows or models)
-- Installs dependencies with the torch stack fully excluded
-- Automatically runs **Repair Environment** after install to resolve any dependency conflicts
-
-### [3] Repair Environment
-
-Deep clean and smart dependency resolution in 6 steps.
-Runs automatically after options `[1]` and `[2]`, and can also be run manually — for example
-after installing custom nodes that break dependencies.
-
-```
-[1/6] Capturing environment snapshot
-[2/6] Cleaning broken pip cache entries  (torch cache preserved — it is 2 GB+)
-[3/6] Removing broken venv artifacts     (orphaned .dist-info, __pycache__, ~* temps)
-[4/6] Running Smart Dependency Guard     (smart_fixer.py)
-[5/6] Applying stable constraints        (const.txt as pip constraint)
-[6/6] Repair summary                     (before/after diff of changed packages)
-```
-
-Shows which packages changed and whether any conflicts remain unresolved.
-If a conflict cannot be fixed, it is likely caused by an incompatible custom node —
-the output will tell you what to do.
-
-### [4] Show Environment Info
-
-Displays a full snapshot of the current environment and saves it to `.cache/env_state.log`.
-Also shows the status of all major accelerators:
-
-```
-  --- System Environment Info ---
-  ComfyUI:         v0.18.1 (a1b2c3d)
-  GPU / CUDA:      NVIDIA GeForce RTX 5060 Ti (16.0 GB VRAM, Driver 572.16, CUDA 13.0)
-  CPU Info:        Intel Core i9-13900K (24C/32T)
-  RAM Size:        64.0 GB
-  Python Version:  3.14.3
-  Torch:           2.10.0+cu130
-  Torchaudio:      2.10.0+cu130
-  Torchvision:     0.25.0+cu130
-  Triton:          Not installed
-  Xformers:        Not installed
-  Flash-Attn:      Not installed
-  Sage-Attn 2:     Not installed
-  Sage-Attn 3:     Not installed
-```
+> After a swap, PyTorch and all pip packages must be reinstalled.
+> Use **[T]** to reinstall PyTorch, then **[V]** to resync ComfyUI requirements.
 
 ---
 
-## smart_fixer.py
+### Packages `[T] [V] [R]`
 
-Internal tool — **not called directly**. Deployed automatically to `.cache/` by the Manager
-when the Repair function runs.
+#### `[T]` Torch — Change PyTorch / CUDA stack
 
-What it does:
+Two-level selection: CUDA version → PyTorch version.
 
-- Reads `ComfyUI/requirements.txt` to build the package check list
-- Imports each package in a subprocess with all warnings enabled
-- Detects `DependencyWarning` — parses the conflicting package and required version
-- Resolves and installs a satisfying version (up to 5 retry attempts per package)
-- If all conflicts resolved — writes a stable snapshot to `.cache/const.txt`
+- CUDA version list is fetched dynamically from `docs.pytorch.org`
+- PyTorch version list is fetched via `pip index versions` from the PyTorch index (stable, documented)
+- Installs `torch` + `torchvision` + `torchaudio` + `torchsde` as a matched set
+- Syncs `ComfyUI/requirements.txt` afterwards (torch stack excluded to avoid conflicts)
+- Saves a version snapshot to `.cache/const.txt`
+- Runs **[R] Repair** automatically after install
 
-Protected packages — **never modified** by smart_fixer or any repair tool:
+**Protected packages** — never modified by any repair or install operation:
 
 | Package | Reason |
-|---|---|
-| `torch` | CUDA build — not resolvable from standard PyPI index |
+|---------|--------|
+| `torch` | CUDA build — not resolvable from standard PyPI |
 | `torchvision` | must match torch version exactly |
 | `torchaudio` | must match torch version exactly |
+| `torchsde` | torch-coupled, version-sensitive |
+| `comfyui-workflow-templates` | managed separately during version switch |
 
-These can only be changed via **option [1] Change Torch Stack**.
+#### `[V]` ComfyUI — Switch version
+
+Two-level selection: branch (e.g. `v0.18`) → patch version (e.g. `v0.18.5`).
+
+- Fetches all tags via `git fetch --tags`
+- Optionally fetches and displays release notes from GitHub API before switching; saves to `.cache/release_notes.log`
+- Detects downgrades and offers to delete the database to avoid migration errors
+  *(database stores only asset cache and job history — no workflows or models)*
+- Installs `requirements.txt` for the target version with torch stack excluded
+- Warns if the target version is below `v0.13.0` (minimum recommended)
+- Runs **[R] Repair** automatically after switching
+
+#### `[R]` Repair — Auto dependency fix
+
+Deep clean and smart dependency resolution in 8 steps.
+Runs automatically after **[T]** and **[V]**, and can be triggered manually —
+for example after installing custom nodes that break dependencies.
+
+```
+[1/8] Capturing environment snapshot
+[2/8] Cleaning broken pip cache entries    (torch cache preserved — 2 GB+)
+[3/8] Removing broken venv artifacts       (orphaned .dist-info, __pycache__, ~* temps)
+[4/8] Running Smart Dependency Guard       (smart_fixer.py)
+[5/8] Updating comfyui-workflow-templates  (ensures sub-packages are current)
+[6/8] Installing missing transitive deps   (packages required by installed packages)
+[7/8] Applying stable constraints          (const.txt as pip constraint)
+[8/8] Repair summary                       (before/after diff of changed packages)
+```
+
+**Smart Dependency Guard** (`smart_fixer.py`) — how it works:
+
+1. Runs `pip check` to find all dependency conflicts (stable, machine-readable output)
+2. For each conflict: queries `pip index versions` to find a satisfying version
+3. Installs the resolved version, retries up to 5 times per package
+4. If all conflicts resolved — writes a stable snapshot to `const.txt`
+5. `const.txt` is then applied as a `PIP_CONSTRAINT` for all future pip operations
+
+If a conflict cannot be resolved, it is likely caused by an incompatible custom node.
+The output will tell you which package is the source and suggest using ComfyUI-Manager
+to disable or downgrade the problematic node.
+
+---
+
+### Tools `[I] [C] [M] [H]`
+
+#### `[I]` Info — Environment snapshot
+
+Displays full environment info and saves to `.cache/env_state.log`:
+
+```
+ComfyUI:         v0.18.5 (7782171a)
+GPU:             NVIDIA GeForce RTX 5060 Ti (16.0 GB VRAM, Driver 595.79, CUDA 13.2)
+CPU:             12th Gen Intel Core i3-12100F (4C/8T)
+RAM:             64.0 GB
+Python:          3.12.10
+PyTorch:         2.11.0+cu130
+Torchaudio:      2.11.0+cu130
+Torchvision:     0.26.0+cu130
+Triton:          not installed
+xFormers:        not installed
+Flash-Attn:      not installed
+SageAttn 2:      not installed
+SageAttn 3:      not installed
+```
+
+#### `[C]` Console — venv shell
+
+Opens an interactive shell with the venv activated.
+All `pip` commands install into the venv only — not into the global system Python.
+
+If `.cache/const.txt` exists, a reminder is shown that you can use it as a constraint:
+```
+pip install <package> -c .cache\const.txt
+```
+
+Type `exit` and press Enter to return to the menu.
+
+#### `[M]` ComfyUI-Manager — Install plugin
+
+Clones [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager) into
+`ComfyUI/custom_nodes/` if not already installed. Detects existing installation and skips.
+
+#### `[H]` Help
+
+Runs `python main.py --help` and shows all available ComfyUI command-line flags.
 
 ---
 
 ## Accelerators (optional)
 
-Accelerators such as Triton, xFormers, SageAttention and Flash Attention are **not installed
-automatically**. They must be installed manually using the venv console (option 8 in the launcher).
+Triton, xFormers, SageAttention, and Flash Attention are **not installed automatically**.
+Install them manually via the venv console **[C]**.
 
-You need to select a pre-built wheel that matches your exact combination of
-**Python version + Torch version + CUDA version**. Use option `[4] Show Environment Info`
-in the Manager to see your current versions before choosing a package.
-
-**Official sources:**
+Before choosing a wheel, check your exact versions via **[I] Info** —
+you need a build matching your exact **Python + PyTorch + CUDA** combination.
 
 | Accelerator | Source |
-|---|---|
+|-------------|--------|
 | Triton (Windows) | https://github.com/triton-lang/triton-windows |
 | SageAttention | https://github.com/woct0rdho/SageAttention |
 | xFormers | https://github.com/facebookresearch/xformers |
 | Flash Attention | https://github.com/Dao-AILab/flash-attention |
 
-**Pre-built wheels collections:**
+**Pre-built wheels for RTX 5xxx Blackwell:**
+https://github.com/Rogala/AI_Attention
 
-| Collection | Notes |
-|---|---|
-| https://github.com/wildminder/AI-windows-whl | Large collection of pre-built Windows wheels |
-| https://github.com/Rogala/AI_Attention | Builds optimized for RTX 5xxx Blackwell architecture |
-
-**Installation example (from venv console, option 8):**
-
-```bat
-pip install <path-to-wheel-file>.whl
+**Installation via venv console [C]:**
+```
+pip install <path-to-wheel>.whl
 ```
 
-or directly from a URL if the source provides one.
-
 ---
 
-## Notes
+## Developer notes
 
-- The `.ps1` files are already saved with **UTF-8 BOM** encoding — do not change the encoding
-  when editing them, otherwise PowerShell will fail to parse them correctly on Windows
-- `const.txt` is regenerated after every successful repair or torch install — do not edit manually
-- The `.bat` launcher activates the venv once at startup and keeps it active for the entire session
-- `.cache/` and `output/` are created automatically — you do not need to create them manually
+### Adding a language
+
+Open `comfyui.ps1`, find `#region I18N`. Add your language code to `$script:LangCycle`
+and a new column to each row in `$T`:
+
+```powershell
+$script:LangCycle = @('en','uk','de')
+
+$T = @{
+  'section.launch' = @{ en='Launch'; uk='Запуск'; de='Starten' }
+  ...
+}
+```
+
+### Encoding
+
+`comfyui.ps1` must be saved as **UTF-8 with BOM** (`UTF-8 BOM`).
+PowerShell 5.1 on Windows requires BOM to correctly parse files with non-ASCII characters.
+Most editors (VS Code, Notepad++) have this as a save option.
+
+### const.txt
+
+`const.txt` is regenerated after every successful repair or torch install.
+Do not edit manually — it is overwritten automatically.
+
+The file is used as a `PIP_CONSTRAINT` — pip will refuse to install versions
+that conflict with it. This prevents custom node installs from silently
+downgrading packages that ComfyUI depends on.
 
 ---
-
 
 ## Troubleshooting
 
@@ -402,199 +395,514 @@ or directly from a URL if the source provides one.
 **Symptom:**
 ```
 [ERROR] Could not retrieve Python version list.
-[WARN] Install aborted: no Python version selected.
 ```
 
-**Cause:**
-You have the legacy **Python Launcher** (`py.exe`) installed on your system.
-The toolkit uses the new **Python Manager** (`pymanager`) which has a different command syntax.
-When both are present, the old launcher takes priority and `py list --online` fails.
+**Cause:** The legacy **Python Launcher** (`py.exe`) is installed and conflicts with
+Python Manager. Both use `py.exe` but with incompatible command syntax.
 
 **Fix:**
-1. Open **Settings → Apps → Installed Apps**
-2. Search for **"Python Launcher"**
-3. Uninstall it
-4. Open a new terminal window
-5. Run the Environment script again
+1. **Settings → Apps → Installed Apps** → search **"Python Launcher"** → Uninstall
+2. Open a new terminal, run the toolkit again
 
-> Your existing Python installations are **not affected** — only the old launcher is removed.
-> Windows will confirm this with the message:
-> *"If you have already installed the Python install manager, open Installed Apps and remove
-> 'Python Launcher' to enable the new py.exe command."*
+> Your existing Python installations are **not affected**.
 
 ---
 
+### Wrong Python version used for venv
 
-### Python already installed system-wide (without Python Launcher)
+**Symptom:** venv uses unexpected Python, or `py -3.12` calls the wrong interpreter.
 
-**Symptom:**
-The Environment script runs without errors but the venv ends up using a wrong Python version,
-or `py -3.12` calls a different Python than expected.
-
-**Cause:**
-If Python was installed manually (not through the Python Manager), it registers itself in PATH
-directly. When `py -X.XX` is called, there may be a conflict between the system Python and
-the one managed by `pymanager`.
+**Cause:** Python was installed manually (not through Python Manager) and registered
+itself in PATH directly, conflicting with Python Manager's version resolution.
 
 **Fix:**
-1. Open a new terminal and run:
+1. Run `py list`, `where python`, `where py` to see what is being called
+2. If there is a conflict — uninstall manually installed Python versions via
+   **Settings → Apps → Installed Apps**
+3. Let Python Manager handle all Python versions
+
+---
+
+### ComfyUI fails to start after downgrade
+
+**Symptom:** ComfyUI crashes on startup with a database migration error.
+
+**Cause:** The database contains migrations from a newer version that the downgraded
+ComfyUI does not know about.
+
+**Fix:** Use **[V]** ComfyUI version switcher — it detects downgrades and offers
+to delete the database automatically. The database contains only asset cache and
+job history, not your workflows or models.
+
+---
+
+### ComfyUI fails to start — `No module named 'torchsde'`
+
+**Symptom:** ComfyUI crashes with `ModuleNotFoundError: No module named 'torchsde'`.
+
+**Cause:** `torchsde` was not installed as part of the PyTorch stack.
+
+**Fix:** Run **[T]** to reinstall PyTorch — `torchsde` is now installed automatically.
+Or install manually via **[C]** console:
 ```
-py list
-where python
-where py
+pip install torchsde
 ```
-2. Make sure `py` points to the Python Manager version, not a manually installed one
-3. If there is a conflict — open **Settings → Apps → Installed Apps**, find any manually
-   installed Python versions (e.g. **Python 3.12.x**) and uninstall them
-4. Let Python Manager handle all Python versions — it is designed to coexist cleanly
-
-> **Note:** Uninstalling a system Python will not affect the toolkit venv once it is created —
-> the venv is self-contained. But for a clean first install it is better to have only
-> Python Manager managing your Python versions.
 
 ---
 
-### General recommendation before first install
+### Custom node breaks dependencies after install
 
-Before running `ComfyUI-Environment.ps1` for the first time, make sure your system does not
-have conflicting Python tooling:
+**Symptom:** ComfyUI starts but some nodes fail, or there are import errors.
 
-- **Python Launcher (legacy)** — remove it if present (see above)
-- **Other Python versions installed system-wide** — they will not be affected by the toolkit,
-  but if you have `PIP_CONSTRAINT` or other environment variables set globally they may
-  interfere with the venv setup
-
-The toolkit manages everything inside its own folder and venv — it does not touch your
-system Python or any other Python projects on your machine.
+**Fix:** Run **[R] Repair**. If the conflict cannot be resolved automatically,
+the output will identify the problematic package. Use ComfyUI-Manager to
+disable or downgrade the custom node that caused the conflict, then run Repair again.
 
 ---
 
 ---
 
-## Українська секція
+# Українська
 
+## Що це таке?
 
-> [!WARNING]
-> **Перед першим запуском скриптів:**
-> - Видали старий **Python Launcher** якщо встановлений (Параметри → Програми → пошук "Python Launcher")
-> - Видали будь-які вручну встановлені версії Python щоб уникнути конфліктів PATH
-> - Дай toolkit встановити Python через **Python Manager** (`pymanager`)
->
-> Пропуск цього кроку — найпоширеніша причина помилок при встановленні. Дивись розділ [Вирішення проблем](#вирішення-проблем).
-
-### Що це
-
-**ComfyUI-Toolkit** — набір інструментів для Windows що автоматизує все навколо ComfyUI:
-встановлення середовища з нуля, перемикання версій Python та PyTorch, керування залежностями
-та запуск ComfyUI — все з одного `.bat` файлу. Тільки для відеокарт NVIDIA.
+**ComfyUI Toolkit** автоматизує все навколо ComfyUI на Windows: встановлення середовища
+з нуля, перемикання версій Python, керування стеком PyTorch/CUDA, виправлення конфліктів
+залежностей та запуск ComfyUI — все з одного `.bat` файлу.
 
 Це **не портативна версія**. Це локально клонований ComfyUI що працює всередині
 віртуального середовища Python (venv). Всі пакети ізольовані у venv і не впливають
 на системний Python або будь-яке інше програмне забезпечення на твоєму комп'ютері.
 
-Призначено для користувачів які не бояться консолі і хочуть розуміти що відбувається —
-toolkit бере на себе рутину налаштування та обслуговування, але нічого не приховує.
+Призначено для користувачів які не бояться консолі і хочуть розуміти що відбувається.
+Toolkit бере на себе рутину налаштування та обслуговування, але нічого не приховує.
+Ручне керування пакетами доступне в будь-який момент через вбудовану консоль venv.
 
-Ручне керування пакетами доступне в будь-який момент через вбудовану консоль venv (пункт 8).
-
-### Для кого
+## Для кого
 
 - Для тих хто робить перші кроки з локальним ComfyUI і хоче чистий покроковий процес
-- Для досвідчених користувачів що перемикаються між версіями PyTorch / CUDA або тестують нові релізи
+- Для досвідчених користувачів що перемикаються між версіями PyTorch/CUDA або тестують нові релізи
 - Для тих хто зламав venv і потребує надійного інструменту відновлення
 - Для тих хто використовує багато custom nodes і стикається з конфліктами залежностей
 
-### Вимоги
+## Вимоги
 
 - Windows 10 / 11 (64-bit)
 - Відеокарта NVIDIA з підтримкою CUDA
-- Інтернет-з'єднання (потрібне постійно — для встановлення, оновлень та отримання списків версій)
-- PowerShell 5.1+ (вбудований в Windows 10/11)
-- Права адміністратора (тільки для скрипту Environment)
+- Інтернет-з'єднання (потрібне для встановлення, оновлень та отримання списків версій)
+- PowerShell 5.1+ (вбудований у Windows 10/11)
+- Права адміністратора — **тільки при першому встановленні** Python Manager, Git та VC++ Runtime
 
-> **Чому потрібні права адміністратора?**
-> `ComfyUI-Environment.ps1` встановлює системні програми: Git for Windows, Python Manager (`pymanager`)
-> та Visual C++ Runtime. Це вимагає підвищених привілеїв — так само як будь-який стандартний
-> інсталятор. Скрипт не змінює нічого за межами цих встановлень і папки де він знаходиться.
-> Ти можеш переглянути весь вихідний код перед запуском.
+## Структура файлів
 
-### Структура папки
-
-Поклади всі чотири файли в **порожню папку на швидкому диску (SSD або NVMe), бажано не
+Поклади обидва файли в **порожню папку на швидкому диску (SSD або NVMe), бажано не
 системному** — ComfyUI з моделями та venv займають десятки гігабайт:
 
 ```
-ваша-папка/          <- рекомендовано: швидкий не системний SSD/NVMe
+ваша-папка/                     ← рекомендовано: швидкий не системний SSD/NVMe
 │
-├── start_comfyui.bat            <- головний лаунчер, починай тут
-├── ComfyUI-Environment.ps1      <- встановлення та керування середовищем
-├── ComfyUI-Manager.ps1          <- PyTorch, версії ComfyUI, ремонт залежностей
-├── smart_fixer.py               <- авто-ремонт залежностей (викликається Manager-ом)
+├── start_comfyui.bat           ← точка входу — подвійний клік для запуску
+├── comfyui.ps1                 ← вся логіка тут
 │
-├── ComfyUI/                     <- створюється скриптом Environment
-├── venv/                        <- створюється скриптом Environment
-├── output/                      <- створюється лаунчером (твої згенеровані зображення)
-└── .cache/                      <- створюється Manager-ом (логи, знімки стану)
+│   — створюється автоматично —
+│
+├── ComfyUI/                    ← клонується при [E] Встановлення
+├── venv/                       ← створюється при [E] Встановлення
+├── output/                     ← створюється при першому запуску (твої згенеровані зображення)
+└── .cache/                     ← створюється автоматично
+    ├── smart_fixer.py          ← розгортається з comfyui.ps1 при старті
+    ├── const.txt               ← знімок стабільних залежностей (pip constraint)
+    ├── settings.json           ← збережене налаштування мови
+    ├── history.log             ← лог усіх операцій з мітками часу
+    ├── release_notes.log       ← release notes ComfyUI при зміні версії
+    └── env_state.log           ← останній знімок [I] Інфо
 ```
 
-> Папка `output/` знаходиться поруч з `.bat` а не всередині `ComfyUI/` — щоб зображення
-> не загубились при видаленні або перевстановленні папки `ComfyUI/`.
+> **Чому `output/` поруч з `.bat` а не всередині `ComfyUI/`?**
+> Якщо видалити або перевстановити папку `ComfyUI/` — все всередині зникне.
+> Зображення на рівні кореня зберігаються при будь-якому перевстановленні.
 
-### Перший запуск
+> **Чому тільки два файли?**
+> `smart_fixer.py` вбудований у `comfyui.ps1` як here-string і розгортається
+> в `.cache/` автоматично при старті. Керувати ним вручну не потрібно.
 
-1. Поклади всі чотири файли в порожню папку
-2. Запусти `start_comfyui.bat`
-3. Лаунчер виявить відсутність `venv` і запропонує одразу запустити `ComfyUI-Environment.ps1`
-4. Підтверди — середовище встановиться автоматично, лаунчер перезапуститься
-5. Вибери пункт `6` щоб відкрити `ComfyUI-Manager.ps1`, потім:
-   - `[1]` встанови PyTorch стек
-   - `[2]` вибери версію ComfyUI (це синхронізує всі залежності)
-6. Вибери пункт `1` або `2` для запуску ComfyUI
+## Перед першим запуском
 
-### Прискорювачі (опціонально)
+> [!WARNING]
+> **Видали старий Python Launcher** якщо встановлений перед запуском toolkit.
+> Перейди до **Параметри → Програми → Встановлені програми**, знайди **"Python Launcher"**
+> і видали. Toolkit використовує новий **Python Manager** (`pymanager`) який конфліктує
+> зі старим. Твої існуючі версії Python **не постраждають** — видаляється тільки старий launcher.
+
+Також видали будь-які вручну встановлені версії Python щоб уникнути конфліктів PATH.
+Дозволь toolkit встановлювати Python і керувати ним через Python Manager.
+
+## Швидкий старт
+
+### Перший запуск (нічого не встановлено)
+
+1. Поклади `start_comfyui.bat` та `comfyui.ps1` в порожню папку
+2. Подвійний клік на `start_comfyui.bat`
+3. Лаунчер виявляє відсутність `venv` і пропонує запустити встановлення
+4. Підтвердь — процес встановлення запускається автоматично
+5. Після встановлення: натисни **[T]** щоб налаштувати стек PyTorch
+6. Натисни **[V]** щоб вибрати версію ComfyUI (це синхронізує всі залежності)
+7. Натисни **[1]** щоб запустити ComfyUI
+
+### Наступні запуски
+
+Подвійний клік на `start_comfyui.bat` → натисни **[1]** або **[2]** для запуску.
+
+---
+
+## Інтерфейс
+
+Лаунчер відкривається у **вікні PowerShell** з повною підтримкою Unicode та кольорів.
+Навігація — **одним натисканням клавіші**, без Enter.
+
+### Хедер
+
+```
+  ==============================================================
+    ComfyUI Launcher                                       [UK]
+  ==============================================================
+
+   Python 3.12.10 ✓   ComfyUI v0.18.5 ✓   PyTorch 2.11.0+cu130
+
+  Щоб змінити мову натисни [L] Language / Українська: UK  (EN UK)
+
+   * Доступне оновлення: v0.19.0
+```
+
+- **Python / ComfyUI** — зелений бейдж якщо знайдено, червоний якщо відсутній
+- **PyTorch** — блакитний бейдж з версією та суфіксом CUDA, червоний якщо відсутній
+- **`[UK]`** — код поточної мови інтерфейсу в рядку заголовку
+- **Підказка мови** — показує назву поточної мови; натисни `[L]` щоб перемкнути
+- **`* Доступне оновлення`** — з'являється коли виявлено новішу версію ComfyUI на GitHub
+  (перевірка виконується раз на сесію у фоні, затримки при відмальовуванні меню немає)
+
+### Мова
+
+Натискай **`[L]`** в будь-який момент щоб перемикати між двома мовами:
+
+`EN ↔ UK`
+
+Вибір зберігається автоматично в `.cache/settings.json` і відновлюється при наступному запуску.
+При першому запуску мова визначається автоматично з системного локалю (`Get-Culture`).
+
+Технічні рядки логу (`[OK]`, `[WARN]`, `[ERROR]`, `[STEP]`) — завжди англійською
+незалежно від вибраної мови. Це полегшує пошук помилок в інтернеті.
+
+---
+
+## Довідник меню
+
+### Запуск
+
+| Клавіша | Назва | Опис |
+|---------|-------|------|
+| `1` | Звичайний | Стандартний запуск ComfyUI з `COMMON_ARGS` |
+| `2` | Швидкий | Додає `--fast` (експериментальні оптимізації швидкості) |
+
+**Додати власний режим запуску** — відкрий `comfyui.ps1`, знайди `$LAUNCH_MODES` в `#region CONFIG`
+і додай один рядок:
+
+```powershell
+@{ Key="3"; LabelKey="menu.lowvram.label"; DescKey="menu.lowvram.desc"; Args=@("--lowvram") }
+```
+
+Меню перебудовується автоматично. Більше нічого змінювати не потрібно.
+
+**Спільні аргументи** — відредагуй `$COMMON_ARGS` в `#region CONFIG`:
+
+```powershell
+$COMMON_ARGS = @("--output-directory", ".\output", "--listen", "--reserve-vram", "0.5")
+```
+
+---
+
+### Середовище `[E] [U] [S]`
+
+#### `[E]` Встановлення ★ Потребує прав адміністратора
+
+Повне встановлення з нуля. З'явиться запит UAC — це очікувана поведінка.
+
+**Кроки з правами адміна** (виконуються в окремому підвищеному вікні яке закривається автоматично):
+1. **Python Manager** (`pymanager`) — новий менеджер версій Python від python.org
+2. **Git for Windows** — остання версія з GitHub
+3. **Visual C++ Runtime** — якщо ще не встановлений
+
+**Кроки від звичайного користувача** (виконуються в основному вікні після закриття підвищеного):
+
+4. **Версія Python** — інтерактивний вибір зі списку онлайн (тільки стабільні версії, без dev/alpha/beta); встановлюється якщо потрібно
+5. **venv** — створюється під обраною версією Python
+6. **pip** — оновлюється всередині venv
+7. **ComfyUI** — клонується з офіційного репозиторію Comfy-Org
+
+Після встановлення: використовуй **[T]** для встановлення PyTorch, потім **[V]** для вибору версії ComfyUI.
+
+> **Чому потрібні права адміністратора?**
+> Python Manager і Git записують у системний PATH. VC++ Runtime записує в системний реєстр.
+> Це стандартні операції інсталятора — такі самі як у будь-якого програмного забезпечення.
+> Все інше (venv, pip, ComfyUI) працює від твого звичайного облікового запису.
+
+#### `[U]` Оновлення
+
+Оновлює тільки Git і мінорну версію Python. Venv і папка ComfyUI не чіпаються.
+
+- Git: перевіряє останній реліз на GitHub, повідомляє якщо оновлення потребує адміна
+- Python: `py install X.Y --update` через Python Manager — без адміна
+- pip: оновлюється всередині venv
+
+#### `[S]` Swap Python
+
+Змінює версію Python яку використовує venv. Папка ComfyUI не чіпається.
+
+**Безпечний порядок операцій:**
+1. Вибір нової версії Python (інтерактивно, тільки стабільні версії)
+2. Підтвердження деструктивної дії
+3. Видалення старого venv
+4. Створення нового venv під обраною версією
+5. Оновлення pip
+
+> Після swap потрібно перевстановити PyTorch і всі pip-пакети.
+> Використай **[T]** для перевстановлення PyTorch, потім **[V]** для ресинхронізації залежностей ComfyUI.
+
+---
+
+### Пакети `[T] [V] [R]`
+
+#### `[T]` Torch — Змінити стек PyTorch / CUDA
+
+Дворівневий вибір: версія CUDA → версія PyTorch.
+
+- Список версій CUDA отримується динамічно з `docs.pytorch.org`
+- Список версій PyTorch отримується через `pip index versions` (стабільний задокументований формат)
+- Встановлює `torch` + `torchvision` + `torchaudio` + `torchsde` як узгоджений набір
+- Синхронізує `ComfyUI/requirements.txt` після встановлення (стек torch виключається)
+- Зберігає знімок версій у `.cache/const.txt`
+- Автоматично запускає **[R] Ремонт** після встановлення
+
+**Захищені пакети** — ніколи не змінюються жодною операцією ремонту або встановлення:
+
+| Пакет | Причина |
+|-------|---------|
+| `torch` | CUDA-збірка — не резолвиться зі стандартного PyPI |
+| `torchvision` | повинна точно відповідати версії torch |
+| `torchaudio` | повинна точно відповідати версії torch |
+| `torchsde` | прив'язана до torch, чутлива до версій |
+| `comfyui-workflow-templates` | керується окремо при зміні версії |
+
+#### `[V]` ComfyUI — Переключити версію
+
+Дворівневий вибір: гілка (напр. `v0.18`) → патч-версія (напр. `v0.18.5`).
+
+- Отримує всі теги через `git fetch --tags`
+- Опційно показує release notes з GitHub API перед перемиканням; зберігає у `.cache/release_notes.log`
+- Виявляє даунгрейди і пропонує видалити базу даних щоб уникнути помилок міграції
+  *(база даних містить тільки кеш ресурсів та історію задач — не воркфлоу і не моделі)*
+- Встановлює `requirements.txt` для цільової версії з виключенням стека torch
+- Попереджає якщо цільова версія нижче `v0.13.0` (мінімально рекомендована)
+- Автоматично запускає **[R] Ремонт** після перемикання
+
+#### `[R]` Ремонт — Авторемонт залежностей
+
+Глибоке очищення та розумне вирішення конфліктів залежностей у 8 кроків.
+Запускається автоматично після **[T]** і **[V]**, і може бути запущений вручну —
+наприклад після встановлення custom nodes які ламають залежності.
+
+```
+[1/8] Знімок середовища перед ремонтом
+[2/8] Очищення пошкоджених записів pip cache     (кеш torch збережено — 2 ГБ+)
+[3/8] Видалення пошкоджених артефактів venv       (orphaned .dist-info, __pycache__, ~* temps)
+[4/8] Запуск Smart Dependency Guard               (smart_fixer.py)
+[5/8] Оновлення comfyui-workflow-templates        (забезпечує актуальність під-пакетів)
+[6/8] Встановлення відсутніх транзитивних залежностей
+[7/8] Застосування стабільних обмежень            (const.txt як pip constraint)
+[8/8] Підсумок ремонту                            (diff пакетів до/після)
+```
+
+**Smart Dependency Guard** (`smart_fixer.py`) — як працює:
+
+1. Запускає `pip check` щоб знайти всі конфлікти залежностей (стабільний машинозчитуваний вивід)
+2. Для кожного конфлікту: запитує `pip index versions` щоб знайти відповідну версію
+3. Встановлює знайдену версію, повторює до 5 разів на пакет
+4. Якщо всі конфлікти вирішено — записує стабільний знімок у `const.txt`
+5. `const.txt` застосовується як `PIP_CONSTRAINT` для всіх наступних pip-операцій
+
+Якщо конфлікт не вдається вирішити — скоріш за все причина в несумісному custom node.
+Вивід покаже який пакет є джерелом і запропонує використати ComfyUI-Manager
+щоб відключити або понизити версію проблемного ноду.
+
+---
+
+### Інструменти `[I] [C] [M] [H]`
+
+#### `[I]` Інфо — Знімок середовища
+
+Виводить повну інформацію про середовище і зберігає у `.cache/env_state.log`:
+
+```
+ComfyUI:         v0.18.5 (7782171a)
+GPU:             NVIDIA GeForce RTX 5060 Ti (16.0 ГБ VRAM, Driver 595.79, CUDA 13.2)
+CPU:             12th Gen Intel Core i3-12100F (4C/8T)
+RAM:             64.0 ГБ
+Python:          3.12.10
+PyTorch:         2.11.0+cu130
+Torchaudio:      2.11.0+cu130
+Torchvision:     0.26.0+cu130
+Triton:          не встановлено
+xFormers:        не встановлено
+Flash-Attn:      не встановлено
+SageAttn 2:      не встановлено
+SageAttn 3:      не встановлено
+```
+
+#### `[C]` Консоль — venv shell
+
+Відкриває інтерактивну оболонку з активованим venv.
+Всі `pip` команди встановлюють пакети тільки у venv — не в системний Python.
+
+Якщо `.cache/const.txt` існує — показується підказка що можна використовувати його як обмеження:
+```
+pip install <пакет> -c .cache\const.txt
+```
+
+Введи `exit` і натисни Enter щоб повернутись до меню.
+
+#### `[M]` ComfyUI-Manager — Встановити плагін
+
+Клонує [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager) у
+`ComfyUI/custom_nodes/` якщо ще не встановлено. Виявляє існуючу установку і пропускає.
+
+#### `[H]` Довідка
+
+Запускає `python main.py --help` і показує всі доступні прапори командного рядка ComfyUI.
+
+---
+
+## Прискорювачі (опціонально)
 
 Triton, xFormers, SageAttention та Flash Attention **не встановлюються автоматично**.
-Їх треба встановити вручну через консоль venv (пункт 8 в лаунчері).
+Встанови їх вручну через консоль venv **[C]**.
 
-Перед вибором пакету перевір свої версії через пункт `[4] Show Environment Info` в Manager —
-потрібно підібрати білд під точну комбінацію **Python + Torch + CUDA**.
+Перед вибором колеса перевір свої точні версії через **[I] Інфо** —
+потрібна збірка під точну комбінацію **Python + PyTorch + CUDA**.
 
-Офіційні джерела та збірки білдів — дивись секцію **Accelerators** вище.
+| Прискорювач | Джерело |
+|-------------|---------|
+| Triton (Windows) | https://github.com/triton-lang/triton-windows |
+| SageAttention | https://github.com/woct0rdho/SageAttention |
+| xFormers | https://github.com/facebookresearch/xformers |
+| Flash Attention | https://github.com/Dao-AILab/flash-attention |
 
+**Збірки для RTX 5xxx Blackwell:**
+https://github.com/Rogala/AI_Attention
 
-### Вирішення проблем
+**Встановлення через консоль venv [C]:**
+```
+pip install <шлях-до-файлу>.whl
+```
 
-**Помилка: список версій Python недоступний під час Install**
+---
 
-Симптом: `[ERROR] Could not retrieve Python version list.`
+## Нотатки для розробників
 
-Причина: в системі встановлений старий **Python Launcher** (legacy `py.exe`) який конфліктує
-з новим **Python Manager**. Видали його через **Параметри → Програми → Встановлені програми**,
-знайди **"Python Launcher"** і видали. Існуючі версії Python не постраждають.
+### Додати мову
 
+Відкрий `comfyui.ps1`, знайди `#region I18N`. Додай код мови у `$script:LangCycle`
+і нову колонку у кожен рядок `$T`:
 
-**Python вже встановлений в системі (без Python Launcher)**
+```powershell
+$script:LangCycle = @('en','uk','de')
 
-Симптом: venv створюється від не тієї версії Python, або `py -3.12` викликає не той інтерпретатор.
+$T = @{
+  'section.launch' = @{ en='Launch'; uk='Запуск'; de='Starten' }
+  ...
+}
+```
 
-Причина: Python встановлений вручну прописує себе в PATH напряму і може конфліктувати з Python Manager.
+### Кодування файлу
 
-Виправлення:
-1. Перевір командами `py list`, `where python`, `where py` — що саме викликається
+`comfyui.ps1` повинен бути збережений у кодуванні **UTF-8 з BOM** (`UTF-8 BOM`).
+PowerShell 5.1 на Windows потребує BOM для коректного парсингу файлів з не-ASCII символами.
+У більшості редакторів (VS Code, Notepad++) це є опцією при збереженні.
+
+### const.txt
+
+`const.txt` перегенеровується після кожного успішного ремонту або встановлення torch.
+Не редагуй вручну — перезаписується автоматично.
+
+Файл використовується як `PIP_CONSTRAINT` — pip відмовить встановлювати версії
+що конфліктують з ним. Це захищає від ситуації коли custom node мовчки знижує
+версію пакету від якого залежить ComfyUI.
+
+---
+
+## Вирішення проблем
+
+### Список версій Python недоступний під час встановлення
+
+**Симптом:**
+```
+[ERROR] Could not retrieve Python version list.
+```
+
+**Причина:** Встановлений старий **Python Launcher** (`py.exe`) конфліктує з
+Python Manager. Обидва використовують `py.exe` але з несумісним синтаксисом команд.
+
+**Виправлення:**
+1. **Параметри → Програми → Встановлені програми** → пошук **"Python Launcher"** → Видалити
+2. Відкрий нове вікно термінала, запусти toolkit знову
+
+> Твої існуючі версії Python **не постраждають**.
+
+---
+
+### Використовується не та версія Python для venv
+
+**Симптом:** venv використовує неочікувану версію Python, або `py -3.12` викликає не той інтерпретатор.
+
+**Причина:** Python встановлений вручну (не через Python Manager) і прописав себе в PATH
+напряму, конфліктуючи з резолюцією версій Python Manager.
+
+**Виправлення:**
+1. Виконай `py list`, `where python`, `where py` щоб побачити що викликається
 2. Якщо є конфлікт — видали вручну встановлені версії Python через **Параметри → Програми**
-3. Дай Python Manager керувати всіма версіями Python — він для цього і призначений
+3. Дозволь Python Manager керувати всіма версіями Python
 
-**Загальна рекомендація перед першим встановленням**
+---
 
-Перед запуском `ComfyUI-Environment.ps1` переконайся що в системі немає старого Python Launcher.
-Якщо Windows показує повідомлення про legacy `py.exe` — це саме та проблема.
+### ComfyUI не запускається після даунгрейду
 
-### Важливо
+**Симптом:** ComfyUI падає при старті з помилкою міграції бази даних.
 
-- Це не портативна версія — це повноцінний локальний ComfyUI у venv
-- Інтернет потрібен завжди — без нього встановлення та оновлення не працюватимуть
-- Файли `.ps1` вже збережені з кодуванням **UTF-8 BOM** — не змінюй кодування при редагуванні
-- `const.txt` перегенеровується після кожного успішного ремонту або встановлення torch — не редагуй вручну
-- Захищені пакети (`torch`, `torchvision`, `torchaudio`) змінюються тільки через пункт `[1]` в Manager
-- Деякі операції в Manager можуть займати 10–30 секунд без виводу — це нормально, скрипт не завис
-- Ремонт залежностей запускається автоматично після встановлення torch або зміни версії ComfyUI
+**Причина:** База даних містить міграції з новішої версії яких стара версія не знає.
+
+**Виправлення:** Використай **[V]** перемикач версій ComfyUI — він виявляє даунгрейди
+і пропонує видалити базу даних автоматично. База містить тільки кеш ресурсів та
+історію задач, не воркфлоу і не моделі.
+
+---
+
+### ComfyUI не запускається — `No module named 'torchsde'`
+
+**Симптом:** ComfyUI падає з `ModuleNotFoundError: No module named 'torchsde'`.
+
+**Причина:** `torchsde` не був встановлений разом зі стеком PyTorch.
+
+**Виправлення:** Запусти **[T]** для перевстановлення PyTorch — `torchsde` тепер
+встановлюється автоматично. Або встанови вручну через консоль **[C]**:
+```
+pip install torchsde
+```
+
+---
+
+### Custom node ламає залежності після встановлення
+
+**Симптом:** ComfyUI запускається але деякі ноди падають, або є помилки імпорту.
+
+**Виправлення:** Запусти **[R] Ремонт**. Якщо конфлікт не вдається вирішити автоматично —
+вивід покаже проблемний пакет. Використай ComfyUI-Manager щоб відключити або понизити
+версію custom node що спричинив конфлікт, потім запусти Ремонт знову.
