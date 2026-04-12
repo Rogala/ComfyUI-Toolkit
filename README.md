@@ -357,20 +357,6 @@ pip install <path-to-wheel>.whl
 
 ## Developer notes
 
-### Adding a language
-
-Open `comfyui.ps1`, find `#region I18N`. Add your language code to `$script:LangCycle`
-and a new column to each row in `$T`:
-
-```powershell
-$script:LangCycle = @('en','uk','de')
-
-$T = @{
-  'section.launch' = @{ en='Launch'; uk='Запуск'; de='Starten' }
-  ...
-}
-```
-
 ### Encoding
 
 `comfyui.ps1` must be saved as **UTF-8 with BOM** (`UTF-8 BOM`).
@@ -807,20 +793,6 @@ pip install <шлях-до-файлу>.whl
 ---
 
 ## Нотатки для розробників
-
-### Додати мову
-
-Відкрий `comfyui.ps1`, знайди `#region I18N`. Додай код мови у `$script:LangCycle`
-і нову колонку у кожен рядок `$T`:
-
-```powershell
-$script:LangCycle = @('en','uk','de')
-
-$T = @{
-  'section.launch' = @{ en='Launch'; uk='Запуск'; de='Starten' }
-  ...
-}
-```
 
 ### Кодування файлу
 
